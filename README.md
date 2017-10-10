@@ -1,5 +1,5 @@
 # SmsMatrix
-A simple SMS (text message) &lt;--> Matrix bridge.
+A simple SMS (text message) &lt;--> Matrix bridge.  
 
 # Set up
 - Create a acount on a homeserver
@@ -11,5 +11,5 @@ A simple SMS (text message) &lt;--> Matrix bridge.
   - Homeserver url: is the url of the homeserver where the user is created
   - Your username: is where you want to forward all yous text message to
   - Devicename: is the devicename wich the api will use
- - Press save
- - Now all your text messages will be bridged
+- Press save
+- Now all your text messages will be bridged
