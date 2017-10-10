@@ -1,0 +1,17 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Base.TextAppearance.AppCompat.Subhead"></style>
+
+    <style name="Base.TextAppearance.AppCompat"></style>
+
+    <style name="Base.TextAppearance"></style>
+
+    <style name="Base"></style>
+
+
+</resources>
