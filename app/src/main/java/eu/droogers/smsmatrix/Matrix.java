@@ -154,7 +154,7 @@ public class Matrix {
     public void SendMesageToRoom(Room room, String body) {
         Message msg = new Message();
         msg.body = body;
-        msg.msgtype = "m.mesage";
+        msg.msgtype = "m.text";
         session.getRoomsApiClient().sendMessage(String.valueOf(transaction), room.getRoomId(), msg, new SimpleApiCallback<Event>());
         transaction++;
     }
