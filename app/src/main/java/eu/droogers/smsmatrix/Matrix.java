@@ -141,7 +141,7 @@ public class Matrix {
         }
     }
 
-    public void sendMessage(final String phoneNumber, final String body) {
+    public void sendMessage(final String phoneNumber, final String body, final String type) {
         if (session != null && session.isAlive()) {
             Room room = getRoomByPhonenumber(phoneNumber);
             if (room == null) {
@@ -153,16 +153,16 @@ public class Matrix {
                         session.getRoomsApiClient().updateTopic(info, phoneNumber, new SimpleApiCallback<Void>());
                         changeDisplayname(info, getContactName(phoneNumber, context));
                         Room room = store.getRoom(info);
-                        SendMesageToRoom(room, body);
+                        SendMesageToRoom(room, body, type);
                     }
                 });
             } else {
                 changeDisplayname(room.getRoomId(), getContactName(phoneNumber, context));
-                SendMesageToRoom(room, body);
+                SendMesageToRoom(room, body, type);
             }
         } else {
             Log.e(tag, "Error with sending message");
-            notSendMesages.add(new NotSendMesage(phoneNumber, body));
+            notSendMesages.add(new NotSendMesage(phoneNumber, body, type));
         }
     }
 
@@ -173,10 +173,10 @@ public class Matrix {
         session.getRoomsApiClient().sendStateEvent(roomId, "m.room.member", session.getMyUserId(), params, new SimpleApiCallback<Void>());
     }
 
-    public void SendMesageToRoom(Room room, String body) {
+    public void SendMesageToRoom(Room room, String body, String type) {
         Message msg = new Message();
         msg.body = body;
-        msg.msgtype = "m.text";
+        msg.msgtype = type;
         session.getRoomsApiClient().sendMessage(String.valueOf(transaction), room.getRoomId(), msg, new SimpleApiCallback<Event>());
         transaction++;
     }
@@ -213,7 +213,7 @@ public class Matrix {
 
     public void sendMessageList(List<NotSendMesage> messages) {
         for (NotSendMesage ms : messages) {
-            sendMessage(ms.getPhone(), ms.getBody());
+            sendMessage(ms.getPhone(), ms.getBody(), ms.getType());
         }
     }
 

@@ -46,8 +46,9 @@ public class MatrixService extends Service {
 
         String phone = intent.getStringExtra("SendSms_phone");
         String body = intent.getStringExtra("SendSms_body");
+        String type = intent.getStringExtra("SendSms_type");
         if (phone != null) {
-            mx.sendMessage(phone, body);
+            mx.sendMessage(phone, body, type);
         }
         return START_NOT_STICKY;
 
