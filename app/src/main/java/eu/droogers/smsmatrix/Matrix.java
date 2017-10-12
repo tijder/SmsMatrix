@@ -1,11 +1,17 @@
 package eu.droogers.smsmatrix;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.util.Log;
 
+
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import org.json.JSONException;
 
 import org.matrix.androidsdk.HomeServerConnectionConfig;
 import org.matrix.androidsdk.MXDataHandler;
@@ -24,7 +30,9 @@ import org.matrix.androidsdk.rest.model.login.Credentials;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.content.ContentValues.TAG;
 
@@ -43,6 +51,8 @@ public class Matrix {
     private IMXEventListener evLis;
     IMXStore store;
     String deviceName;
+    private String botUsername;
+    private String botHSUrl;
 
     private String realUserid;
 
@@ -52,6 +62,8 @@ public class Matrix {
 
         realUserid = username;
         deviceName = device;
+        this.botUsername = botUsername;
+        botHSUrl = url;
 
         login(botUsername, botPassword);
     }
@@ -139,16 +151,31 @@ public class Matrix {
                     public void onSuccess(String info) {
                         super.onSuccess(info);
                         session.getRoomsApiClient().updateTopic(info, phoneNumber, new SimpleApiCallback<Void>());
-                        SendMesageToRoom(store.getRoom(info), body);
+                        changeDisplayname(info, getContactName(phoneNumber, context));
+                        Room room = store.getRoom(info);
+                        SendMesageToRoom(room, body);
                     }
                 });
             } else {
+                changeDisplayname(room.getRoomId(), getContactName(phoneNumber, context));
                 SendMesageToRoom(room, body);
             }
         } else {
             Log.e(tag, "Error with sending message");
             notSendMesages.add(new NotSendMesage(phoneNumber, body));
         }
+    }
+
+    private void changeDisplayname(String roomId, String displayname) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("displayname", displayname);
+        params.put("membership", "join");
+        session.getRoomsApiClient().sendStateEvent(roomId, "m.room.member", botId(), params, new SimpleApiCallback<Void>());
+    }
+
+    private String botId() {
+        String baseUrl = botHSUrl.replaceFirst("^(http(?>s)://www\\.|http(?>s)://|www\\.)","");
+        return "@" + botUsername + ":" + baseUrl;
     }
 
     public void SendMesageToRoom(Room room, String body) {
@@ -195,7 +222,7 @@ public class Matrix {
         }
     }
 
-    public Room getRoomByPhonenumber (String number) {
+    private Room getRoomByPhonenumber (String number) {
         Collection<Room> rooms = store.getRooms();
         Log.e(TAG, "getRoomByPhonenumber: " + number );
         Log.e(TAG, "getRoomByPhonenumber: " + rooms.size() );
@@ -206,6 +233,29 @@ public class Matrix {
             }
         }
         return null;
+    }
+
+    private String getContactName(final String phoneNumber, Context context)
+    {
+        Uri uri=Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,Uri.encode(phoneNumber));
+
+        String[] projection = new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME};
+
+        String contactName="";
+        Cursor cursor=context.getContentResolver().query(uri,projection,null,null,null);
+
+        if (cursor != null) {
+            if(cursor.moveToFirst()) {
+                contactName=cursor.getString(0);
+            }
+            cursor.close();
+        }
+
+        if (contactName.isEmpty()) {
+            contactName = phoneNumber;
+        }
+
+        return contactName;
     }
 
     public void destroy() {

@@ -55,7 +55,7 @@ public class EventListener implements IMXEventListener {
 //            mx.getUnreadEvents();
             mx.sendEvent(event);
         }
-        Log.e(TAG, "onLiveEvent: " + event + " " + event.getSender() + " : " + event.getContent());
+        Log.e(TAG, "onLiveEvent: " + event);
     }
 
     @Override
