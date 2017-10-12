@@ -21,6 +21,8 @@ public class MatrixService extends Service {
     private String username;
     private String device;
     private String hsUrl;
+    private String syncDelay;
+    private String syncTimeout;
 
     @Override
     public void onCreate() {
@@ -35,9 +37,11 @@ public class MatrixService extends Service {
         username = sp.getString("username", "");
         device = sp.getString("device", "");
         hsUrl = sp.getString("hsUrl", "");
+        syncDelay = sp.getString("syncDelay", "");
+        syncTimeout = sp.getString("syncTimeout", "");
 
-        if (mx == null && !botUsername.isEmpty() && !botPassword.isEmpty() && !username.isEmpty() && !device.isEmpty() && !hsUrl.isEmpty()) {
-            mx = new Matrix(getApplication(), hsUrl, botUsername, botPassword, username, device);
+        if (mx == null && !botUsername.isEmpty() && !botPassword.isEmpty() && !username.isEmpty() && !device.isEmpty() && !hsUrl.isEmpty() && !syncDelay.isEmpty() && !syncTimeout.isEmpty()) {
+            mx = new Matrix(getApplication(), hsUrl, botUsername, botPassword, username, device, syncDelay, syncTimeout);
             Log.e(TAG, "onStartCommand222: " + hsUrl );
             Toast.makeText(this, "service starting:", Toast.LENGTH_SHORT).show();
         }

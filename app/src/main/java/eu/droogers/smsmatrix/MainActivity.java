@@ -22,6 +22,8 @@ public class MainActivity extends Activity {
     private EditText username;
     private EditText device;
     private EditText hsUrl;
+    private EditText syncDelay;
+    private EditText syncTimeout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,12 +37,16 @@ public class MainActivity extends Activity {
         username = (EditText) findViewById(R.id.editText_username);
         device = (EditText) findViewById(R.id.editText_device);
         hsUrl = (EditText) findViewById(R.id.editText_hsUrl);
+        syncDelay = (EditText) findViewById(R.id.editText_syncDelay);
+        syncTimeout = (EditText) findViewById(R.id.editText_syncTimeout);
 
         botUsername.setText(sp.getString("botUsername", ""));
         botPassword.setText(sp.getString("botPassword", ""));
         username.setText(sp.getString("username", ""));
         device.setText(sp.getString("device", ""));
         hsUrl.setText(sp.getString("hsUrl", ""));
+        syncDelay.setText(sp.getString("syncDelay", ""));
+        syncTimeout.setText(sp.getString("syncTimeout", ""));
 
 
         Button saveButton = (Button) findViewById(R.id.button_save);
@@ -54,6 +60,8 @@ public class MainActivity extends Activity {
                 editor.putString("username", username.getText().toString());
                 editor.putString("device", device.getText().toString());
                 editor.putString("hsUrl", hsUrl.getText().toString());
+                editor.putString("syncDelay", syncDelay.getText().toString());
+                editor.putString("syncTimeout", syncTimeout.getText().toString());
                 editor.apply();
 
                 Log.e(TAG, "onClick: " + botUsername.getText().toString() );

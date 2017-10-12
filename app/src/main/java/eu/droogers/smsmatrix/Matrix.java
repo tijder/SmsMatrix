@@ -41,6 +41,8 @@ import static android.content.ContentValues.TAG;
  */
 
 public class Matrix {
+    private final int syncDelay;
+    private final int syncTimeout;
     HomeServerConnectionConfig hsConfig;
     Context context;
     MXSession session;
@@ -56,7 +58,7 @@ public class Matrix {
 
     private String realUserid;
 
-    public Matrix (final Context context, String url, String botUsername, String botPassword, String username, String device) {
+    public Matrix(final Context context, String url, String botUsername, String botPassword, String username, String device, String syncDelay, String syncTimeout) {
         this.context = context;
         hsConfig = new HomeServerConnectionConfig(Uri.parse(url));
 
@@ -64,6 +66,8 @@ public class Matrix {
         deviceName = device;
         this.botUsername = botUsername;
         botHSUrl = url;
+        this.syncDelay = Integer.parseInt(syncDelay);
+        this.syncTimeout = Integer.parseInt(syncTimeout);
 
         login(botUsername, botPassword);
     }
@@ -99,8 +103,8 @@ public class Matrix {
 //        NetworkConnectivityReceiver nwMan = new NetworkConnectivityReceiver();
 
         session = new MXSession(hsConfig, dh, context);
-        session.setSyncDelay(12000);
-        session.setSyncTimeout(30*60*1000);
+        session.setSyncDelay(syncDelay * 1000);
+        session.setSyncTimeout(syncTimeout * 60 * 1000);
         Log.e(TAG, "onLogin:" + session.getSyncTimeout());
 
 
