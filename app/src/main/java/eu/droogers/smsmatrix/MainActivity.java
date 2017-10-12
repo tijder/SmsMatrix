@@ -1,9 +1,11 @@
 package eu.droogers.smsmatrix;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +27,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        checkPermissions();
 
         sp = getSharedPreferences("settings", Context.MODE_PRIVATE);
         botUsername = (EditText) findViewById(R.id.editText_botUsername);
@@ -44,6 +47,7 @@ public class MainActivity extends Activity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkPermissions();
                 SharedPreferences.Editor editor = sp.edit();
                 editor.putString("botUsername", botUsername.getText().toString());
                 editor.putString("botPassword", botPassword.getText().toString());
@@ -57,6 +61,20 @@ public class MainActivity extends Activity {
             }
         });
         startService();
+    }
+
+    private void checkPermissions() {
+        askPermission(Manifest.permission.SEND_SMS);
+        askPermission(Manifest.permission.READ_PHONE_STATE);
+        askPermission(Manifest.permission.READ_CONTACTS);
+        askPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+
+    }
+
+    private void askPermission(String permission) {
+        if (getApplicationContext().checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+            this.requestPermissions(new String[]{permission},1);
+        }
     }
 
     private void startService() {
