@@ -170,12 +170,7 @@ public class Matrix {
         Map<String, Object> params = new HashMap<>();
         params.put("displayname", displayname);
         params.put("membership", "join");
-        session.getRoomsApiClient().sendStateEvent(roomId, "m.room.member", botId(), params, new SimpleApiCallback<Void>());
-    }
-
-    private String botId() {
-        String baseUrl = botHSUrl.replaceFirst("^(http(?>s)://www\\.|http(?>s)://|www\\.)","");
-        return "@" + botUsername + ":" + baseUrl;
+        session.getRoomsApiClient().sendStateEvent(roomId, "m.room.member", session.getMyUserId(), params, new SimpleApiCallback<Void>());
     }
 
     public void SendMesageToRoom(Room room, String body) {
