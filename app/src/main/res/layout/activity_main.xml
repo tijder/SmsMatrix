@@ -100,6 +100,40 @@
         android:hint="Sms_mobiel"
         android:inputType="textPersonName" />
 
+    <TextView
+        android:id="@+id/textView_syncDelay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="SyncDelay in seconds"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/editText_syncDelay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ems="10"
+        android:hint="12"
+        android:inputType="number" />
+
+    <TextView
+        android:id="@+id/textView_syncTimeout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="SyncTimeout in minutes"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/editText_syncTimeout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ems="10"
+        android:hint="30"
+        android:inputType="number" />
+
     <Button
         android:id="@+id/button_save"
         android:layout_width="match_parent"
