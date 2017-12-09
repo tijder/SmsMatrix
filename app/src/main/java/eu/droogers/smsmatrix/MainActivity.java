@@ -45,8 +45,8 @@ public class MainActivity extends Activity {
         username.setText(sp.getString("username", ""));
         device.setText(sp.getString("device", ""));
         hsUrl.setText(sp.getString("hsUrl", ""));
-        syncDelay.setText(sp.getString("syncDelay", ""));
-        syncTimeout.setText(sp.getString("syncTimeout", ""));
+        syncDelay.setText(sp.getString("syncDelay", "12"));
+        syncTimeout.setText(sp.getString("syncTimeout", "30"));
 
 
         Button saveButton = (Button) findViewById(R.id.button_save);
