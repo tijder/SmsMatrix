@@ -37,8 +37,8 @@ public class MatrixService extends Service {
         username = sp.getString("username", "");
         device = sp.getString("device", "");
         hsUrl = sp.getString("hsUrl", "");
-        syncDelay = sp.getString("syncDelay", "");
-        syncTimeout = sp.getString("syncTimeout", "");
+        syncDelay = sp.getString("syncDelay", "12");
+        syncTimeout = sp.getString("syncTimeout", "60");
 
         if (mx == null && !botUsername.isEmpty() && !botPassword.isEmpty() && !username.isEmpty() && !device.isEmpty() && !hsUrl.isEmpty() && !syncDelay.isEmpty() && !syncTimeout.isEmpty()) {
             mx = new Matrix(getApplication(), hsUrl, botUsername, botPassword, username, device, syncDelay, syncTimeout);
