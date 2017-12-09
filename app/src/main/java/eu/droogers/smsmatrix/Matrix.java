@@ -145,17 +145,19 @@ public class Matrix {
         if (session != null && session.isAlive()) {
             Room room = getRoomByPhonenumber(phoneNumber);
             if (room == null) {
-                Log.e(TAG, "sendMessage: not found" );
-                session.createRoomDirectMessage(realUserid, new SimpleApiCallback<String>() {
-                    @Override
-                    public void onSuccess(String info) {
-                        super.onSuccess(info);
-                        session.getRoomsApiClient().updateTopic(info, phoneNumber, new SimpleApiCallback<Void>());
-                        changeDisplayname(info, getContactName(phoneNumber, context));
-                        Room room = store.getRoom(info);
-                        SendMesageToRoom(room, body, type);
-                    }
-                });
+                if (!type.equals("m.notice")) {
+                    Log.e(TAG, "sendMessage: not found" );
+                    session.createRoomDirectMessage(realUserid, new SimpleApiCallback<String>() {
+                        @Override
+                        public void onSuccess(String info) {
+                            super.onSuccess(info);
+                            session.getRoomsApiClient().updateTopic(info, phoneNumber, new SimpleApiCallback<Void>());
+                            changeDisplayname(info, getContactName(phoneNumber, context));
+                            Room room = store.getRoom(info);
+                            SendMesageToRoom(room, body, type);
+                        }
+                    });
+                }
             } else {
                 changeDisplayname(room.getRoomId(), getContactName(phoneNumber, context));
                 SendMesageToRoom(room, body, type);
