@@ -36,7 +36,7 @@ public class ReceiverListener extends BroadcastReceiver {
                     msgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
                     msg_from = msgs[i].getOriginatingAddress();
                     String msgBody = msgs[i].getMessageBody();
-                    sendMatrix(context, msgBody, msg_from, "m.text");
+                    Utilities.sendMatrix(context, msgBody, msg_from, Matrix.MESSAGE_TYPE_TEXT);
                 }
             }catch(Exception e){
                 Log.d("Exception caught",e.getMessage());
@@ -59,14 +59,6 @@ public class ReceiverListener extends BroadcastReceiver {
                 body += " is calling";
                 break;
         }
-        sendMatrix(context, body, cal_from, "m.notice");
-    }
-
-    private void sendMatrix(Context context, String body, String phone, String type) {
-        Intent intent = new Intent(context, MatrixService.class);
-        intent.putExtra("SendSms_phone", phone);
-        intent.putExtra("SendSms_body", body);
-        intent.putExtra("SendSms_type", type);
-        context.startService(intent);
+        Utilities.sendMatrix(context, body, cal_from, Matrix.MESSAGE_TYPE_NOTICE);
     }
 }

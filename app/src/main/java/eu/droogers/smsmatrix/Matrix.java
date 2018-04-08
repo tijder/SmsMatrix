@@ -22,12 +22,14 @@ import org.matrix.androidsdk.data.store.IMXStoreListener;
 import org.matrix.androidsdk.data.store.MXFileStore;
 import org.matrix.androidsdk.data.store.MXMemoryStore;
 import org.matrix.androidsdk.listeners.IMXEventListener;
+import org.matrix.androidsdk.listeners.MXMediaUploadListener;
 import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 import org.matrix.androidsdk.rest.client.LoginRestClient;
 import org.matrix.androidsdk.rest.model.Event;
 import org.matrix.androidsdk.rest.model.Message;
 import org.matrix.androidsdk.rest.model.login.Credentials;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,6 +59,12 @@ public class Matrix {
     private String botHSUrl;
 
     private String realUserid;
+
+    // Message type constants.
+    public static final String MESSAGE_TYPE_TEXT = "m.text";
+    public static final String MESSAGE_TYPE_IMAGE = "m.image";
+    public static final String MESSAGE_TYPE_VIDEO = "m.video";
+    public static final String MESSAGE_TYPE_NOTICE = "m.notice";
 
     public Matrix(final Context context, String url, String botUsername, String botPassword, String username, String device, String syncDelay, String syncTimeout) {
         this.context = context;
@@ -170,6 +178,45 @@ public class Matrix {
             Log.e(tag, "Error with sending message");
             notSendMesages.add(new NotSendMesage(phoneNumber, body, type));
         }
+    }
+
+    public void sendFile(
+        final String phoneNumber,
+        final byte[] body,
+        final String type,
+        final String fileName,
+        final String contentType
+    ) {
+        String uploadID = String.valueOf(transaction);
+        transaction++;
+        session.getMediasCache().uploadContent(
+            new ByteArrayInputStream(body),
+            fileName,
+            contentType,
+            uploadID,
+            new MXMediaUploadListener()
+            {
+                @Override
+                public void onUploadComplete(final String uploadId, final String contentUri) {
+                    Room room = getRoomByPhonenumber(phoneNumber);
+                    JsonObject json = new JsonObject();
+                    json.addProperty("body", fileName);
+                    json.addProperty("msgtype", type);
+                    json.addProperty("url", contentUri);
+                    JsonObject info = new JsonObject();
+                    info.addProperty("mimetype", contentType);
+                    json.add("info", info);
+                    session.getRoomsApiClient().sendEventToRoom(
+                        String.valueOf(transaction),
+                        room.getRoomId(),
+                        "m.room.message",
+                        json,
+                        new SimpleApiCallback<Event>()
+                    );
+                    transaction++;
+                }
+            }
+        );
     }
 
     private void changeDisplayname(String roomId, String displayname) {

@@ -72,6 +72,7 @@ public class MainActivity extends Activity {
     }
 
     private void checkPermissions() {
+        askPermission(Manifest.permission.READ_SMS);
         askPermission(Manifest.permission.SEND_SMS);
         askPermission(Manifest.permission.READ_PHONE_STATE);
         askPermission(Manifest.permission.READ_CONTACTS);
