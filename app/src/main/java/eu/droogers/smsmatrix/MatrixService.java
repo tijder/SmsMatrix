@@ -23,6 +23,7 @@ public class MatrixService extends Service {
     private String hsUrl;
     private String syncDelay;
     private String syncTimeout;
+    private MMSMonitor mms;
 
     @Override
     public void onCreate() {
@@ -49,11 +50,25 @@ public class MatrixService extends Service {
         Log.e(TAG, "onStartCommand: Service");
 
         String phone = intent.getStringExtra("SendSms_phone");
-        String body = intent.getStringExtra("SendSms_body");
         String type = intent.getStringExtra("SendSms_type");
         if (phone != null) {
-            mx.sendMessage(phone, body, type);
+            if (type.equals(Matrix.MESSAGE_TYPE_TEXT))
+            {
+                String body = intent.getStringExtra("SendSms_body");
+                mx.sendMessage(phone, body, type);
+            } else {
+                byte[] body = intent.getByteArrayExtra("SendSms_body");
+                String fileName = intent.getStringExtra("SendSms_fileName");
+                String contentType = intent.getStringExtra("SendSms_contentType");
+                mx.sendFile(phone, body, type, fileName, contentType);
+            }
         }
+
+        if (this.mms == null) {
+            this.mms = new MMSMonitor(this , getApplicationContext());
+            this.mms.startMMSMonitoring();
+        }
+
         return START_NOT_STICKY;
 
     }
@@ -61,6 +76,8 @@ public class MatrixService extends Service {
     @Override
     public void onDestroy() {
         mx.destroy();
+        this.mms.stopMMSMonitoring();
+        this.mms = null;
         super.onDestroy();
     }
 
