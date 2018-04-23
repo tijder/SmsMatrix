@@ -1,11 +1,13 @@
 package eu.droogers.smsmatrix;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.widget.Toast;
 
 
 import com.google.gson.JsonElement;
@@ -250,10 +252,17 @@ public class Matrix {
     public void sendEvent(Event event) {
         if (event.sender.equals(realUserid)) {
             Room room = store.getRoom(event.roomId);
-            JsonElement json = event.getContent();
-            String body = json.getAsJsonObject().get("body").getAsString();
             SmsManager smsManager = SmsManager.getDefault();
-            smsManager.sendTextMessage(room.getTopic(), null, body, null, null);
+            JsonObject json = event.getContent().getAsJsonObject();
+
+            if (json.get("msgtype").getAsString().equals(MESSAGE_TYPE_TEXT)) {
+                String body = json.get("body").getAsString();
+                smsManager.sendTextMessage(room.getTopic(), null, body, null, null);
+            } else {
+                String url = session.getContentManager().getDownloadableUrl(json.get("url").getAsString());
+                smsManager.sendTextMessage(room.getTopic(), null, url, null, null);
+            }
+
             room.markAllAsRead(new SimpleApiCallback<Void>());
         }
     }
