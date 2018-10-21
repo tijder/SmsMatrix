@@ -43,8 +43,10 @@ public class MatrixService extends Service {
 
         if (mx == null && !botUsername.isEmpty() && !botPassword.isEmpty() && !username.isEmpty() && !device.isEmpty() && !hsUrl.isEmpty() && !syncDelay.isEmpty() && !syncTimeout.isEmpty()) {
             mx = new Matrix(getApplication(), hsUrl, botUsername, botPassword, username, device, syncDelay, syncTimeout);
-            Log.e(TAG, "onStartCommand222: " + hsUrl );
+            Log.e(TAG, "onStartCommand: " + hsUrl );
             Toast.makeText(this, "service starting:", Toast.LENGTH_SHORT).show();
+        } else if (mx == null) {
+            Toast.makeText(this, "Missing Information", Toast.LENGTH_SHORT).show();
         }
 
         Log.e(TAG, "onStartCommand: Service");
