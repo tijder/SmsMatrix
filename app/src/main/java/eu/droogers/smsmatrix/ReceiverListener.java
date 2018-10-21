@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by gerben on 6-10-17.
@@ -25,22 +27,40 @@ public class ReceiverListener extends BroadcastReceiver {
     }
 
     private void handleIncomingSMS(Context context, Intent intent) {
-        Bundle bundle = intent.getExtras();
+        Map<String, String> msg = null;
         SmsMessage[] msgs = null;
-        String msg_from;
-        if (bundle != null){
-            try{
-                Object[] pdus = (Object[]) bundle.get("pdus");
-                msgs = new SmsMessage[pdus.length];
-                for(int i=0; i<msgs.length; i++){
+        Bundle bundle = intent.getExtras();
+
+        if (bundle != null && bundle.containsKey("pdus")) {
+            Object[] pdus = (Object[]) bundle.get("pdus");
+
+            if (pdus != null) {
+                int nbrOfpdus = pdus.length;
+                msg = new HashMap<String, String>(nbrOfpdus);
+                msgs = new SmsMessage[nbrOfpdus];
+
+                // Send long SMS of same sender in one message
+                for (int i = 0; i < nbrOfpdus; i++) {
                     msgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
-                    msg_from = msgs[i].getOriginatingAddress();
-                    String msgBody = msgs[i].getMessageBody();
-                    Utilities.sendMatrix(context, msgBody, msg_from, Matrix.MESSAGE_TYPE_TEXT);
+
+                    String originatinAddress = msgs[i].getOriginatingAddress();
+
+                    // Check if index with number exists
+                    if (!msg.containsKey(originatinAddress)) {
+                        // Index with number doesn't exist
+                        msg.put(msgs[i].getOriginatingAddress(), msgs[i].getMessageBody());
+
+                    } else {
+                        // Number is there.
+                        String previousparts = msg.get(originatinAddress);
+                        String msgString = previousparts + msgs[i].getMessageBody();
+                        msg.put(originatinAddress, msgString);
+                    }
                 }
-            }catch(Exception e){
-                Log.d("Exception caught",e.getMessage());
             }
+        }
+        for (String originatinAddress : msg.keySet()) {
+            Utilities.sendMatrix(context, msg.get(originatinAddress), originatinAddress, Matrix.MESSAGE_TYPE_TEXT);
         }
     }
 
