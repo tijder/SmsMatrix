@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
                 startService();
             }
         });
-        startService();
+        checkPermissions()
     }
 
     private void checkPermissions() {
