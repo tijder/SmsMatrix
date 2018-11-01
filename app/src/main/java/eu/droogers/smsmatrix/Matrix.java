@@ -254,14 +254,26 @@ public class Matrix {
             Room room = store.getRoom(event.roomId);
             SmsManager smsManager = SmsManager.getDefault();
             JsonObject json = event.getContent().getAsJsonObject();
+            
+            if (event.type.equals("m.room.message")) {
 
-            if (json.get("msgtype").getAsString().equals(MESSAGE_TYPE_TEXT)) {
-                String body = json.get("body").getAsString();
-                smsManager.sendTextMessage(room.getTopic(), null, body, null, null);
+                if (json.get("msgtype").getAsString().equals(MESSAGE_TYPE_TEXT)) {
+                    String body = json.get("body").getAsString();
+                    smsManager.sendTextMessage(room.getTopic(), null, body, null, null);
+                } else {
+                    String url = session.getContentManager().getDownloadableUrl(json.get("url").getAsString());
+                    smsManager.sendTextMessage(room.getTopic(), null, url, null, null);
+                }
+            } else if (event.type.equals("m.room.member")) {
+                if (json.get("membership").getAsString().equals("leave")) {
+                    room.leave(new SimpleApiCallback<Void>());
+                } else if (json.get("membership").getAsString().equals("invite")) {
+                    room.join(new SimpleApiCallback<Void>());
+                }
             } else {
-                String url = session.getContentManager().getDownloadableUrl(json.get("url").getAsString());
-                smsManager.sendTextMessage(room.getTopic(), null, url, null, null);
+                Log.e(TAG, "sendEvent: Event type not supported ");
             }
+
 
             room.markAllAsRead(new SimpleApiCallback<Void>());
         }
