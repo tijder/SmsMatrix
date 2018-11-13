@@ -1,5 +1,8 @@
 # SmsMatrix
-A simple SMS (text message) &lt;--> Matrix bridge.  
+A simple SMS (text message) &lt;--> Matrix bridge.
+
+This app bridges all sms messages to matrix. For every (new) text conversation contact the bot will open a private 1:1 room and sends the incoming messages to that room. Any messages sent in that room by the matrix user will then be sent to the contact via SMS.  
+As currently there is no end-to-end encryption implemented in this app, for privacy reasons it is preferable to use it with your own Matrix server. Your data-in-transit however will always be safe as they are encrypted using https over matrix -- provided the Matrix server is configured properly.
 
 # Set up
 - Create a acount on a homeserver
