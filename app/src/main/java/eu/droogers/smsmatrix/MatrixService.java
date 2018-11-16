@@ -54,11 +54,12 @@ public class MatrixService extends Service {
         String phone = intent.getStringExtra("SendSms_phone");
         String type = intent.getStringExtra("SendSms_type");
         if (phone != null) {
-            if (type.equals(Matrix.MESSAGE_TYPE_TEXT))
+            System.out.println(phone);
+            if (type.equals(Matrix.MESSAGE_TYPE_TEXT) || type.equals(Matrix.MESSAGE_TYPE_NOTICE))
             {
                 String body = intent.getStringExtra("SendSms_body");
                 mx.sendMessage(phone, body, type);
-            } else {
+            } else if (type.equals(Matrix.MESSAGE_TYPE_IMAGE) || type.equals(Matrix.MESSAGE_TYPE_VIDEO)) {
                 byte[] body = intent.getByteArrayExtra("SendSms_body");
                 String fileName = intent.getStringExtra("SendSms_fileName");
                 String contentType = intent.getStringExtra("SendSms_contentType");
