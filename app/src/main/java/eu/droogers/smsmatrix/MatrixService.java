@@ -1,11 +1,15 @@
 package eu.droogers.smsmatrix;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,6 +28,9 @@ public class MatrixService extends Service {
     private String syncDelay;
     private String syncTimeout;
     private MMSMonitor mms;
+    private NotificationManager notificationManager = null;
+    private final static int PERSISTENT_NOTIFICATION_ID = 001;
+    private final static String NOTIFICATION_CHANNEL_ID = "smsmatrix";
 
     @Override
     public void onCreate() {
@@ -44,6 +51,7 @@ public class MatrixService extends Service {
         if (mx == null && !botUsername.isEmpty() && !botPassword.isEmpty() && !username.isEmpty() && !device.isEmpty() && !hsUrl.isEmpty() && !syncDelay.isEmpty() && !syncTimeout.isEmpty()) {
             mx = new Matrix(getApplication(), hsUrl, botUsername, botPassword, username, device, syncDelay, syncTimeout);
             Log.e(TAG, "onStartCommand: " + hsUrl );
+            persistentNotification();
             Toast.makeText(this, "service starting:", Toast.LENGTH_SHORT).show();
         } else if (mx == null) {
             Toast.makeText(this, "Missing Information", Toast.LENGTH_SHORT).show();
@@ -76,9 +84,29 @@ public class MatrixService extends Service {
 
     }
 
+    public void persistentNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Persistent";
+            String description = "Sms Matrix Service is running";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.matrix_user)
+                .setContentTitle("SmsMatrix")
+                .setContentText("Matrix service running")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setOngoing(true);
+        notificationManager.notify(PERSISTENT_NOTIFICATION_ID, mBuilder.build());
+    }
+
     @Override
     public void onDestroy() {
         mx.destroy();
+        notificationManager.cancel(PERSISTENT_NOTIFICATION_ID);
         this.mms.stopMMSMonitoring();
         this.mms = null;
         super.onDestroy();
