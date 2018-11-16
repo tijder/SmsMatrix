@@ -7,8 +7,8 @@ android {
         applicationId "eu.droogers.smsmatrix"
         minSdkVersion 23
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        versionCode 8
+        versionName "0.0.8"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
