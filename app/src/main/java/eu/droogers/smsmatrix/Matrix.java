@@ -256,13 +256,12 @@ public class Matrix {
             JsonObject json = event.getContent().getAsJsonObject();
             
             if (event.type.equals("m.room.message")) {
-
                 if (json.get("msgtype").getAsString().equals(MESSAGE_TYPE_TEXT)) {
-                    String body = json.get("body").getAsString();
-                    smsManager.sendTextMessage(room.getTopic(), null, body, null, null);
+                    ArrayList<String> body = smsManager.divideMessage(json.get("body").getAsString());
+                    smsManager.sendMultipartTextMessage(room.getTopic(), null, body, null, null);
                 } else {
-                    String url = session.getContentManager().getDownloadableUrl(json.get("url").getAsString());
-                    smsManager.sendTextMessage(room.getTopic(), null, url, null, null);
+                    ArrayList<String> url = smsManager.divideMessage(session.getContentManager().getDownloadableUrl(json.get("url").getAsString()));
+                    smsManager.sendMultipartTextMessage(room.getTopic(), null, url, null, null);
                 }
             } else if (event.type.equals("m.room.member")) {
                 if (json.get("membership").getAsString().equals("leave")) {
