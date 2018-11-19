@@ -17,12 +17,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-    repositories {
-        flatDir {
-            dir 'libs'
-        }
-    }
 }
 
 dependencies {
@@ -35,9 +29,9 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
 
-    compile(name: 'matrix-sdk', ext: 'aar')
-    compile(name: 'olm-sdk', ext: 'aar')
-
+    implementation project(':olm-sdk')
+    implementation project(':matrix-sdk')
+    
     compile 'com.squareup.retrofit:retrofit:1.6.1'
     compile 'com.google.code.gson:gson:2.3'
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.2.0'

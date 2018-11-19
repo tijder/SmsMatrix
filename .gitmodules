@@ -1,0 +1,6 @@
+[submodule "matrix-sdk"]
+	path = matrix-sdk
+	url = https://github.com/matrix-org/matrix-android-sdk
+[submodule "olm-sdk"]
+	path = olm-sdk
+	url = http://git.matrix.org/git/olm.git/

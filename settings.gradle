@@ -1,1 +1,5 @@
 include ':app'
+include ':olm-sdk'
+project(':olm-sdk').projectDir=new File('olm-sdk/android/olm-sdk')
+include ':matrix-sdk'
+project(':matrix-sdk').projectDir=new File('matrix-sdk/matrix-sdk')
