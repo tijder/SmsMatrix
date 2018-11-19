@@ -16,3 +16,4 @@ As currently there is no end-to-end encryption implemented in this app, for priv
   - Devicename: is the devicename wich the api will use
 - Press save
 - Now all your text messages will be bridged
+- [optional] Disable battery optimisations for the app. so the app wont be killed by Android.
