@@ -248,7 +248,24 @@ public class Matrix {
         Message msg = new Message();
         msg.body = body;
         msg.msgtype = type;
-        session.getRoomsApiClient().sendMessage(String.valueOf(transaction), room.getRoomId(), msg, new SimpleApiCallback<Event>());
+        session.getRoomsApiClient().sendMessage(String.valueOf(transaction), room.getRoomId(), msg, new SimpleApiCallback<Event>() {
+            @Override
+            public void onSuccess(Event event) {
+                Log.i(TAG, "sendMessage success");
+            }
+            @Override
+            public void onMatrixError(MatrixError e) {
+                Log.e(TAG, "sendMessage MatrixError" + e);
+            }
+            @Override
+            public void onNetworkError(Exception e) {
+                Log.e(TAG, "sendMessage Network error" + e);
+            }
+            @Override
+            public void onUnexpectedError(Exception e) {
+                Log.e(TAG, "sendMessage Unexpected error" + e);
+            }
+        });
         transaction++;
     }
 
