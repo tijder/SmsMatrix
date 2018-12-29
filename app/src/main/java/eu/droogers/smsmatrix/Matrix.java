@@ -27,8 +27,9 @@ import org.matrix.androidsdk.listeners.IMXEventListener;
 import org.matrix.androidsdk.listeners.MXMediaUploadListener;
 import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 import org.matrix.androidsdk.rest.client.LoginRestClient;
+import org.matrix.androidsdk.rest.model.CreatedEvent;
 import org.matrix.androidsdk.rest.model.Event;
-import org.matrix.androidsdk.rest.model.Message;
+import org.matrix.androidsdk.rest.model.message.Message;
 import org.matrix.androidsdk.rest.model.login.Credentials;
 
 import java.io.ByteArrayInputStream;
@@ -70,7 +71,10 @@ public class Matrix {
 
     public Matrix(final Context context, String url, String botUsername, String botPassword, String username, String device, String syncDelay, String syncTimeout) {
         this.context = context;
-        hsConfig = new HomeServerConnectionConfig(Uri.parse(url));
+
+        HomeServerConnectionConfig.Builder builder = new HomeServerConnectionConfig.Builder();
+
+        hsConfig = builder.withHomeServerUri(Uri.parse(url)).build();
 
         realUserid = username;
         deviceName = device;
@@ -83,11 +87,10 @@ public class Matrix {
     }
 
     private void login(String username, String password) {
-        new LoginRestClient(hsConfig).loginWithUser(username, password, deviceName, new SimpleApiCallback<Credentials>() {
+        new LoginRestClient(hsConfig).loginWithUser(username, password, deviceName, deviceName, new SimpleApiCallback<Credentials>() {
 
             @Override
             public void onSuccess(Credentials credentials) {
-                super.onSuccess(credentials);
                 onLogin(credentials);
             }
         });
@@ -103,7 +106,7 @@ public class Matrix {
 
 
         if (false) {
-            store = new MXFileStore(hsConfig, context);
+            store = new MXFileStore(hsConfig, false, context);
         } else {
             store = new MXMemoryStore(hsConfig.getCredentials(), context);
         }
@@ -112,7 +115,9 @@ public class Matrix {
 
 //        NetworkConnectivityReceiver nwMan = new NetworkConnectivityReceiver();
 
-        session = new MXSession(hsConfig, dh, context);
+        MXSession.Builder builder = new MXSession.Builder(hsConfig, dh, context);
+
+        session = builder.build();
         session.setSyncDelay(syncDelay * 1000);
         session.setSyncTimeout(syncTimeout * 60 * 1000);
         Log.e(TAG, "onLogin:" + session.getSyncTimeout());
@@ -120,7 +125,6 @@ public class Matrix {
 
 
         if (store.isReady()) {
-            session.getDataHandler().checkPermanentStorageData();
             session.startEventStream(store.getEventStreamToken());
             session.getDataHandler().addListener(evLis);
         } else {
@@ -132,7 +136,6 @@ public class Matrix {
 
                 @Override
                 public void onStoreReady(String s) {
-                    session.getDataHandler().checkPermanentStorageData();
                     session.startEventStream(store.getEventStreamToken());
                     session.getDataHandler().addListener(evLis);
                 }
@@ -161,11 +164,16 @@ public class Matrix {
             if (room == null) {
                 if (!type.equals("m.notice")) {
                     Log.e(TAG, "sendMessage: not found" );
-                    session.createRoomDirectMessage(realUserid, new SimpleApiCallback<String>() {
+                    session.createDirectMessageRoom(realUserid, new SimpleApiCallback<String>() {
                         @Override
                         public void onSuccess(String info) {
-                            super.onSuccess(info);
-                            session.getRoomsApiClient().updateTopic(info, phoneNumber, new SimpleApiCallback<Void>());
+                            session.getRoomsApiClient().updateTopic(info, phoneNumber, new SimpleApiCallback<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+
+                                }
+                            });
+
                             changeDisplayname(info, getContactName(phoneNumber, context));
                             Room room = store.getRoom(info);
                             SendMesageToRoom(room, body, type);
@@ -191,7 +199,7 @@ public class Matrix {
     ) {
         String uploadID = String.valueOf(transaction);
         transaction++;
-        session.getMediasCache().uploadContent(
+        session.getMediaCache().uploadContent(
             new ByteArrayInputStream(body),
             fileName,
             contentType,
@@ -213,7 +221,12 @@ public class Matrix {
                         room.getRoomId(),
                         "m.room.message",
                         json,
-                        new SimpleApiCallback<Event>()
+                        new SimpleApiCallback<CreatedEvent>() {
+                            @Override
+                            public void onSuccess(CreatedEvent createdEvent) {
+
+                            }
+                        }
                     );
                     transaction++;
                 }
@@ -225,14 +238,24 @@ public class Matrix {
         Map<String, Object> params = new HashMap<>();
         params.put("displayname", displayname);
         params.put("membership", "join");
-        session.getRoomsApiClient().sendStateEvent(roomId, "m.room.member", session.getMyUserId(), params, new SimpleApiCallback<Void>());
+        session.getRoomsApiClient().sendStateEvent(roomId, "m.room.member", session.getMyUserId(), params, new SimpleApiCallback<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+            }
+        });
     }
 
     public void SendMesageToRoom(Room room, String body, String type) {
         Message msg = new Message();
         msg.body = body;
         msg.msgtype = type;
-        session.getRoomsApiClient().sendMessage(String.valueOf(transaction), room.getRoomId(), msg, new SimpleApiCallback<Event>());
+        session.getRoomsApiClient().sendMessage(String.valueOf(transaction), room.getRoomId(), msg, new SimpleApiCallback<CreatedEvent>() {
+            @Override
+            public void onSuccess(CreatedEvent createdEvent) {
+
+            }
+        });
         transaction++;
     }
 
@@ -250,7 +273,7 @@ public class Matrix {
     }
 
     public void sendEvent(Event event) {
-        if (event.sender.equals(realUserid)) {
+        if ((event.sender != null) && (event.sender.equals(realUserid))) {
             Room room = store.getRoom(event.roomId);
             SmsManager smsManager = SmsManager.getDefault();
             JsonObject json = event.getContent().getAsJsonObject();
@@ -265,16 +288,31 @@ public class Matrix {
                 }
             } else if (event.type.equals("m.room.member")) {
                 if (json.get("membership").getAsString().equals("leave")) {
-                    room.leave(new SimpleApiCallback<Void>());
+                    room.leave(new SimpleApiCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+
+                        }
+                    });
                 } else if (json.get("membership").getAsString().equals("invite")) {
-                    room.join(new SimpleApiCallback<Void>());
+                    room.join(new SimpleApiCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+
+                        }
+                    });
                 }
             } else {
                 Log.e(TAG, "sendEvent: Event type not supported ");
             }
 
 
-            room.markAllAsRead(new SimpleApiCallback<Void>());
+            room.markAllAsRead(new SimpleApiCallback<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+
+                }
+            });
         }
     }
 
