@@ -134,12 +134,33 @@
         android:hint="30"
         android:inputType="number" />
 
+    <CheckBox
+        android:id="@+id/notification_check_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Persistent Notification" />
+
+    <CheckBox
+        android:id="@+id/mms_check_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="MMS Support (expermental)" />
+
     <Button
         android:id="@+id/button_save"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Save" />
+        android:text="Save and Start" />
+
+    <Button
+        android:id="@+id/stop_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Stop Service" />
 
 </LinearLayout>
 </ScrollView>

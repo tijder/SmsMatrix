@@ -2,6 +2,7 @@ package eu.droogers.smsmatrix;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import android.support.v4.app.ActivityCompat;
@@ -20,6 +22,7 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_SMS;
 import static android.Manifest.permission.RECEIVE_SMS;
+import static android.Manifest.permission.RECEIVE_MMS;
 import static android.Manifest.permission.SEND_SMS;
 import static android.content.ContentValues.TAG;
 
@@ -34,7 +37,7 @@ public class MainActivity extends Activity {
     private EditText syncDelay;
     private EditText syncTimeout;
     private static final String[] PERMISSIONS_REQUIRED = new String[]{
-        READ_SMS, SEND_SMS, RECEIVE_SMS, READ_PHONE_STATE, READ_CONTACTS, READ_EXTERNAL_STORAGE
+        READ_SMS, SEND_SMS, RECEIVE_SMS, RECEIVE_MMS, READ_PHONE_STATE, READ_CONTACTS, READ_EXTERNAL_STORAGE
     };
     private static final int PERMISSION_REQUEST_CODE = 200;
 
@@ -51,6 +54,8 @@ public class MainActivity extends Activity {
         hsUrl = (EditText) findViewById(R.id.editText_hsUrl);
         syncDelay = (EditText) findViewById(R.id.editText_syncDelay);
         syncTimeout = (EditText) findViewById(R.id.editText_syncTimeout);
+        final CheckBox notificationCheckBox = (CheckBox) findViewById(R.id.notification_check_box);
+        final CheckBox mmsCheckBox = (CheckBox) findViewById(R.id.mms_check_box);
 
         botUsername.setText(sp.getString("botUsername", ""));
         botPassword.setText(sp.getString("botPassword", ""));
@@ -59,6 +64,8 @@ public class MainActivity extends Activity {
         hsUrl.setText(sp.getString("hsUrl", ""));
         syncDelay.setText(sp.getString("syncDelay", "12"));
         syncTimeout.setText(sp.getString("syncTimeout", "30"));
+        notificationCheckBox.setChecked(sp.getBoolean("notificationCheckBoxStatus", false));
+        mmsCheckBox.setChecked(sp.getBoolean("mmsCheckBoxStatus", false));
 
 
         Button saveButton = (Button) findViewById(R.id.button_save);
@@ -76,6 +83,8 @@ public class MainActivity extends Activity {
                     editor.putString("hsUrl", hsUrl.getText().toString());
                     editor.putString("syncDelay", syncDelay.getText().toString());
                     editor.putString("syncTimeout", syncTimeout.getText().toString());
+                    editor.putBoolean("notificationCheckBoxStatus", notificationCheckBox.isChecked());
+                    editor.putBoolean("mmsCheckBoxStatus", mmsCheckBox.isChecked());
                     editor.apply();
 
                     Log.e(TAG, "onClick: " + botUsername.getText().toString() );
@@ -84,6 +93,23 @@ public class MainActivity extends Activity {
 
             }
         });
+
+
+
+        Button stopButton = (Button) findViewById(R.id.stop_button);
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View testButtonView) {
+                if (!checkPermissions()) {
+                    askPermissions();
+                } else {
+
+                    Intent intnet = new Intent(getApplicationContext(), eu.droogers.smsmatrix.MatrixService.class);
+                    stopService(intnet);
+                }
+            }
+        });
+
         if (!checkPermissions()) {
             askPermissions();
         } else {

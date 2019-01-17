@@ -28,6 +28,7 @@ import org.matrix.androidsdk.listeners.MXMediaUploadListener;
 import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 import org.matrix.androidsdk.rest.client.LoginRestClient;
 import org.matrix.androidsdk.rest.model.Event;
+import org.matrix.androidsdk.rest.model.MatrixError;
 import org.matrix.androidsdk.rest.model.Message;
 import org.matrix.androidsdk.rest.model.login.Credentials;
 
@@ -89,6 +90,12 @@ public class Matrix {
             public void onSuccess(Credentials credentials) {
                 super.onSuccess(credentials);
                 onLogin(credentials);
+            }
+
+            @Override
+            public void onNetworkError(Exception e) {
+                //show in notification
+                super.onNetworkError(e);
             }
         });
     }
@@ -155,7 +162,7 @@ public class Matrix {
         }
     }
 
-    public void sendMessage(final String phoneNumber, final String body, final String type) {
+    public void sendMessage(final String phoneNumber, final String body, final String type, final int databaseId) {
         if (session != null && session.isAlive()) {
             Room room = getRoomByPhonenumber(phoneNumber);
             if (room == null) {
@@ -168,17 +175,23 @@ public class Matrix {
                             session.getRoomsApiClient().updateTopic(info, phoneNumber, new SimpleApiCallback<Void>());
                             changeDisplayname(info, getContactName(phoneNumber, context));
                             Room room = store.getRoom(info);
-                            SendMesageToRoom(room, body, type);
+                            SendMesageToRoom(room, body, type, databaseId);
                         }
                     });
                 }
             } else {
                 changeDisplayname(room.getRoomId(), getContactName(phoneNumber, context));
-                SendMesageToRoom(room, body, type);
+                SendMesageToRoom(room, body, type, databaseId);
             }
         } else {
+            if (databaseId > 0){
+                OpenHelper dbHelper = new OpenHelper(context);
+                DataManager.unlockSms(dbHelper, databaseId);
+                DataManager.errorSms(dbHelper, databaseId, DataManager.ERROR_onNetworkError);
+                dbHelper.close();
+            }
             Log.e(tag, "Error with sending message");
-            notSendMesages.add(new NotSendMesage(phoneNumber, body, type));
+            //notSendMesages.add(new NotSendMesage(phoneNumber, body, type));
         }
     }
 
@@ -187,7 +200,8 @@ public class Matrix {
         final byte[] body,
         final String type,
         final String fileName,
-        final String contentType
+        final String contentType,
+        final int databaseId
     ) {
         String uploadID = String.valueOf(transaction);
         transaction++;
@@ -209,13 +223,35 @@ public class Matrix {
                     info.addProperty("mimetype", contentType);
                     json.add("info", info);
                     session.getRoomsApiClient().sendEventToRoom(
-                        String.valueOf(transaction),
-                        room.getRoomId(),
-                        "m.room.message",
-                        json,
-                        new SimpleApiCallback<Event>()
-                    );
+                            String.valueOf(transaction),
+                            room.getRoomId(),
+                            "m.room.message",
+                            json,
+                            new SimpleApiCallback<Event>(){
+                                @Override
+                                public void onSuccess(Event info) {
+                                    if (databaseId > 0) {
+                                        Log.i(TAG, "sendFile onSuccess, Marking _id=" + databaseId + " as read");
+                                        OpenHelper dbHelper = new OpenHelper(context);
+                                        DataManager.markMmsRead(dbHelper, databaseId);
+                                        DataManager.unlockMms(dbHelper, databaseId);
+                                        dbHelper.close();
+                                    } else {
+                                        //Case of MMS or other thing. maybe I need to add this into the MMS database to see if text made it.
+                                        Log.i(TAG, "sendFile onSuccess, databaseId is 0 - not marking as read");
+                                    }
+                                }
+                            });
                     transaction++;
+                }
+
+                @Override
+                public void onUploadError(String uploadId, int serverResponseCode, String serverErrorMessage) {
+                    OpenHelper dbHelper = new OpenHelper(context);
+                    DataManager.errorMms(dbHelper, databaseId, DataManager.ERROR_onUnexpectedError);
+                    DataManager.unlockMms(dbHelper, databaseId);
+                    dbHelper.close();
+                    super.onUploadError(uploadId, serverResponseCode, serverErrorMessage);
                 }
             }
         );
@@ -228,11 +264,59 @@ public class Matrix {
         session.getRoomsApiClient().sendStateEvent(roomId, "m.room.member", session.getMyUserId(), params, new SimpleApiCallback<Void>());
     }
 
-    public void SendMesageToRoom(Room room, String body, String type) {
+    public void SendMesageToRoom(Room room, String body, String type, final int databaseId) {
+        Log.i(TAG, "TTTHHHHHIIIISSS SendMesageToRoomSendMesageToRoom" );
         Message msg = new Message();
         msg.body = body;
         msg.msgtype = type;
-        session.getRoomsApiClient().sendMessage(String.valueOf(transaction), room.getRoomId(), msg, new SimpleApiCallback<Event>());
+        session.getRoomsApiClient().sendMessage(String.valueOf(transaction), room.getRoomId(), msg, new SimpleApiCallback<Event>(){
+            @Override
+            public void onSuccess(Event info) {
+                if (databaseId > 0) {
+                    Log.i(TAG, "SendMessageToRoom onSuccess, Marking _id=" + databaseId + " as read");
+                    OpenHelper dbHelper = new OpenHelper(context);
+                    DataManager.markSmsRead(dbHelper, databaseId);
+                    DataManager.unlockSms(dbHelper, databaseId);
+                    dbHelper.close();
+                } else {
+                    //Case of text in MMS message.
+                    Log.i(TAG, "SendMessageToRoom onSuccess, databaseId is 0 - not marking as read");
+                }
+            }
+
+            @Override
+            public void onUnexpectedError(Exception e) {
+                if ( databaseId > 0 ) {
+                    OpenHelper dbHelper = new OpenHelper(context);
+                    DataManager.unlockSms(dbHelper, databaseId);
+                    DataManager.errorSms(dbHelper, databaseId, DataManager.ERROR_onUnexpectedError);
+                    dbHelper.close();
+                }
+                super.onUnexpectedError(e);
+            }
+
+            @Override
+            public void onMatrixError(MatrixError e) {
+                if ( databaseId > 0 ){
+                    OpenHelper dbHelper = new OpenHelper(context);
+                    DataManager.unlockSms(dbHelper, databaseId);
+                    DataManager.errorSms(dbHelper, databaseId, DataManager.ERROR_onMatrixError);
+                    dbHelper.close();
+                }
+                super.onMatrixError(e);
+            }
+
+            @Override
+            public void onNetworkError(Exception e) {
+                if ( databaseId > 0 ){
+                    OpenHelper dbHelper = new OpenHelper(context);
+                    DataManager.unlockSms(dbHelper, databaseId);
+                    DataManager.errorSms(dbHelper, databaseId, DataManager.ERROR_onNetworkError);
+                    dbHelper.close();
+                }
+                super.onNetworkError(e);
+            }
+        });
         transaction++;
     }
 
@@ -286,7 +370,7 @@ public class Matrix {
 
     public void sendMessageList(List<NotSendMesage> messages) {
         for (NotSendMesage ms : messages) {
-            sendMessage(ms.getPhone(), ms.getBody(), ms.getType());
+            sendMessage(ms.getPhone(), ms.getBody(), ms.getType(), 0);
         }
     }
 
@@ -327,6 +411,7 @@ public class Matrix {
     }
 
     public void destroy() {
+        Log.e(TAG, "marix.java destry called");
         session.stopEventStream();
         dh.removeListener(evLis);
         store.close();

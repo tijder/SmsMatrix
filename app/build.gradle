@@ -27,6 +27,8 @@ android {
 
 dependencies {
     implementation 'com.android.support:appcompat-v7:26.0.0'
+
+    implementation "com.android.support:support-compat:26.0.0"
     
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {

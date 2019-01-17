@@ -1,6 +1,7 @@
 package eu.droogers.smsmatrix;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,51 +17,31 @@ import java.util.Map;
 
 public class ReceiverListener extends BroadcastReceiver {
     private static final String TAG = "ReceiverListener";
+    private static final String ACTION_MMS_RECEIVED = "android.provider.Telephony.WAP_PUSH_RECEIVED";
+    public static final String MMS_DATA_TYPE = "application/vnd.wap.mms-message";
+    private OpenHelper mDbOpenHelper;
+
+
+
+
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        mDbOpenHelper = new OpenHelper(context);
         if(intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")){
-            handleIncomingSMS(context, intent);
+            Log.d(TAG, "got SMS");
+            Intent newIntent = new Intent(intent);
+            newIntent.setComponent(new ComponentName(context, eu.droogers.smsmatrix.MatrixService.class));
+            newIntent.putExtra("onReceiveType", "sms");
+            context.startService(newIntent);
+        } else if (intent.getAction().equals(ACTION_MMS_RECEIVED) && intent.getType().equals(MMS_DATA_TYPE)) {
+            Log.d(TAG, "got MMS");
+            Intent newIntent = new Intent(intent);
+            newIntent.setComponent(new ComponentName(context, eu.droogers.smsmatrix.MatrixService.class));
+            newIntent.putExtra("onReceiveType", "mms");
+            context.startService(newIntent);
         } else if (intent.getAction().equals("android.intent.action.PHONE_STATE")) {
             handleIncomingCall(context, intent);
-        }
-    }
-
-    private void handleIncomingSMS(Context context, Intent intent) {
-        Map<String, String> msg = null;
-        SmsMessage[] msgs = null;
-        Bundle bundle = intent.getExtras();
-
-        if (bundle != null && bundle.containsKey("pdus")) {
-            Object[] pdus = (Object[]) bundle.get("pdus");
-
-            if (pdus != null) {
-                int nbrOfpdus = pdus.length;
-                msg = new HashMap<String, String>(nbrOfpdus);
-                msgs = new SmsMessage[nbrOfpdus];
-
-                // Send long SMS of same sender in one message
-                for (int i = 0; i < nbrOfpdus; i++) {
-                    msgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
-
-                    String originatinAddress = msgs[i].getOriginatingAddress();
-
-                    // Check if index with number exists
-                    if (!msg.containsKey(originatinAddress)) {
-                        // Index with number doesn't exist
-                        msg.put(msgs[i].getOriginatingAddress(), msgs[i].getMessageBody());
-
-                    } else {
-                        // Number is there.
-                        String previousparts = msg.get(originatinAddress);
-                        String msgString = previousparts + msgs[i].getMessageBody();
-                        msg.put(originatinAddress, msgString);
-                    }
-                }
-            }
-        }
-        for (String originatinAddress : msg.keySet()) {
-            Utilities.sendMatrix(context, msg.get(originatinAddress), originatinAddress, Matrix.MESSAGE_TYPE_TEXT);
         }
     }
 
@@ -79,6 +60,14 @@ public class ReceiverListener extends BroadcastReceiver {
                 body += " is calling";
                 break;
         }
-        Utilities.sendMatrix(context, body, cal_from, Matrix.MESSAGE_TYPE_NOTICE);
+        //sendMatrix(context, body, cal_from, Matrix.MESSAGE_TYPE_NOTICE);
+        //public static void sendMatrix(Context context, String body, String phone, String type) {
+        //    Intent intent = new Intent(context, MatrixService.class);
+        //    intent.putExtra("SendSms_phone", phone);
+        //    intent.putExtra("SendSms_body", body);
+        //    intent.putExtra("SendSms_type", type);
+        //    context.startService(intent);
+        //}
     }
+
 }
