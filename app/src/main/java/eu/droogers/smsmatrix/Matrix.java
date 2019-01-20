@@ -28,6 +28,7 @@ import org.matrix.androidsdk.listeners.MXMediaUploadListener;
 import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
 import org.matrix.androidsdk.rest.client.LoginRestClient;
 import org.matrix.androidsdk.rest.model.Event;
+import org.matrix.androidsdk.rest.model.MatrixError;
 import org.matrix.androidsdk.rest.model.Message;
 import org.matrix.androidsdk.rest.model.login.Credentials;
 
@@ -89,6 +90,21 @@ public class Matrix {
             public void onSuccess(Credentials credentials) {
                 super.onSuccess(credentials);
                 onLogin(credentials);
+            }
+
+            @Override
+            public void onMatrixError(MatrixError e) {
+                Log.e(TAG, "onLogin MatrixError" + e);
+            }
+
+            @Override
+            public void onNetworkError(Exception e) {
+                Log.e(TAG, "onLogin Network error" + e);
+            }
+
+            @Override
+            public void onUnexpectedError(Exception e) {
+                Log.e(TAG, "onLogin Unexpected error" + e);
             }
         });
     }
@@ -232,7 +248,24 @@ public class Matrix {
         Message msg = new Message();
         msg.body = body;
         msg.msgtype = type;
-        session.getRoomsApiClient().sendMessage(String.valueOf(transaction), room.getRoomId(), msg, new SimpleApiCallback<Event>());
+        session.getRoomsApiClient().sendMessage(String.valueOf(transaction), room.getRoomId(), msg, new SimpleApiCallback<Event>() {
+            @Override
+            public void onSuccess(Event event) {
+                Log.i(TAG, "sendMessage success");
+            }
+            @Override
+            public void onMatrixError(MatrixError e) {
+                Log.e(TAG, "sendMessage MatrixError" + e);
+            }
+            @Override
+            public void onNetworkError(Exception e) {
+                Log.e(TAG, "sendMessage Network error" + e);
+            }
+            @Override
+            public void onUnexpectedError(Exception e) {
+                Log.e(TAG, "sendMessage Unexpected error" + e);
+            }
+        });
         transaction++;
     }
 
