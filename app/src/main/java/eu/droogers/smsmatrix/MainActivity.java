@@ -19,6 +19,7 @@ import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_SMS;
+import static android.Manifest.permission.RECEIVE_MMS;
 import static android.Manifest.permission.RECEIVE_SMS;
 import static android.Manifest.permission.SEND_SMS;
 import static android.content.ContentValues.TAG;
@@ -34,7 +35,7 @@ public class MainActivity extends Activity {
     private EditText syncDelay;
     private EditText syncTimeout;
     private static final String[] PERMISSIONS_REQUIRED = new String[]{
-        READ_SMS, SEND_SMS, RECEIVE_SMS, READ_PHONE_STATE, READ_CONTACTS, READ_EXTERNAL_STORAGE
+        READ_SMS, SEND_SMS, RECEIVE_SMS, READ_PHONE_STATE, READ_CONTACTS, READ_EXTERNAL_STORAGE, RECEIVE_MMS
     };
     private static final int PERMISSION_REQUEST_CODE = 200;
 
@@ -79,7 +80,12 @@ public class MainActivity extends Activity {
                     editor.apply();
 
                     Log.e(TAG, "onClick: " + botUsername.getText().toString() );
-                    startService();
+                    Intent matrixService = new Intent(getApplicationContext(), eu.droogers.smsmatrix.MatrixService.class);
+                    startService(matrixService);
+
+                    Intent mmsIntent = new Intent(getApplicationContext(), eu.droogers.smsmatrix.MmsService.class);
+                    mmsIntent.putExtra("startButton", true);
+                    startService(mmsIntent);
                 }
 
             }

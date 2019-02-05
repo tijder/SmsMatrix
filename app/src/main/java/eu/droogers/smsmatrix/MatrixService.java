@@ -23,7 +23,6 @@ public class MatrixService extends Service {
     private String hsUrl;
     private String syncDelay;
     private String syncTimeout;
-    private MMSMonitor mms;
 
     @Override
     public void onCreate() {
@@ -67,10 +66,7 @@ public class MatrixService extends Service {
             }
         }
 
-        if (this.mms == null) {
-            this.mms = new MMSMonitor(this , getApplicationContext());
-            this.mms.startMMSMonitoring();
-        }
+
 
         return START_NOT_STICKY;
 
@@ -79,8 +75,6 @@ public class MatrixService extends Service {
     @Override
     public void onDestroy() {
         mx.destroy();
-        this.mms.stopMMSMonitoring();
-        this.mms = null;
         super.onDestroy();
     }
 
