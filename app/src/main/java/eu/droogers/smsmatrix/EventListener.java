@@ -6,6 +6,7 @@ import org.matrix.androidsdk.data.MyUser;
 import org.matrix.androidsdk.data.RoomState;
 import org.matrix.androidsdk.listeners.IMXEventListener;
 import org.matrix.androidsdk.rest.model.Event;
+import org.matrix.androidsdk.rest.model.MatrixError;
 import org.matrix.androidsdk.rest.model.User;
 import org.matrix.androidsdk.rest.model.bingrules.BingRule;
 
@@ -69,7 +70,7 @@ public class EventListener implements IMXEventListener {
     }
 
     @Override
-    public void onEventEncrypted(Event event) {
+    public void onEventSentStateUpdated(Event event) {
 
     }
 
@@ -84,11 +85,6 @@ public class EventListener implements IMXEventListener {
     }
 
     @Override
-    public void onFailedSendingEvent(Event event) {
-
-    }
-
-    @Override
     public void onBingRulesUpdate() {
 
     }
@@ -98,6 +94,11 @@ public class EventListener implements IMXEventListener {
         loaded = true;
         mx.onEventStreamLoaded();
         mx.getUnreadEvents();
+    }
+
+    @Override
+    public void onSyncError(MatrixError matrixError) {
+
     }
 
     @Override
@@ -121,17 +122,22 @@ public class EventListener implements IMXEventListener {
     }
 
     @Override
-    public void onRoomInitialSyncComplete(String s) {
-
-    }
-
-    @Override
     public void onRoomInternalUpdate(String s) {
 
     }
 
     @Override
+    public void onNotificationCountUpdate(String s) {
+
+    }
+
+    @Override
     public void onLeaveRoom(String s) {
+
+    }
+
+    @Override
+    public void onRoomKick(String s) {
 
     }
 
@@ -152,6 +158,46 @@ public class EventListener implements IMXEventListener {
 
     @Override
     public void onToDeviceEvent(Event event) {
+
+    }
+
+    @Override
+    public void onNewGroupInvitation(String s) {
+
+    }
+
+    @Override
+    public void onJoinGroup(String s) {
+
+    }
+
+    @Override
+    public void onLeaveGroup(String s) {
+
+    }
+
+    @Override
+    public void onGroupProfileUpdate(String s) {
+
+    }
+
+    @Override
+    public void onGroupRoomsListUpdate(String s) {
+
+    }
+
+    @Override
+    public void onGroupUsersListUpdate(String s) {
+
+    }
+
+    @Override
+    public void onGroupInvitedUsersListUpdate(String s) {
+
+    }
+
+    @Override
+    public void onAccountDataUpdated() {
 
     }
 }
