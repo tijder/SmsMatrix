@@ -25,11 +25,11 @@ import org.matrix.androidsdk.data.store.MXFileStore;
 import org.matrix.androidsdk.data.store.MXMemoryStore;
 import org.matrix.androidsdk.listeners.IMXEventListener;
 import org.matrix.androidsdk.listeners.MXMediaUploadListener;
-import org.matrix.androidsdk.rest.callback.SimpleApiCallback;
+import org.matrix.androidsdk.core.callback.SimpleApiCallback;
+import org.matrix.androidsdk.core.model.MatrixError;
 import org.matrix.androidsdk.rest.client.LoginRestClient;
 import org.matrix.androidsdk.rest.model.CreatedEvent;
 import org.matrix.androidsdk.rest.model.Event;
-import org.matrix.androidsdk.rest.model.MatrixError;
 import org.matrix.androidsdk.rest.model.message.Message;
 import org.matrix.androidsdk.rest.model.login.Credentials;
 

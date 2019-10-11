@@ -6,9 +6,10 @@ import org.matrix.androidsdk.data.MyUser;
 import org.matrix.androidsdk.data.RoomState;
 import org.matrix.androidsdk.listeners.IMXEventListener;
 import org.matrix.androidsdk.rest.model.Event;
-import org.matrix.androidsdk.rest.model.MatrixError;
+import org.matrix.androidsdk.core.model.MatrixError;
 import org.matrix.androidsdk.rest.model.User;
 import org.matrix.androidsdk.rest.model.bingrules.BingRule;
+import org.matrix.androidsdk.rest.model.sync.AccountDataElement;
 
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class EventListener implements IMXEventListener {
 
     @Override
     public void onLiveEvent(Event event, RoomState roomState) {
-        if (loaded == true) {
+        if (loaded) {
 //            mx.getUnreadEvents();
             mx.sendEvent(event);
         }
@@ -75,12 +76,12 @@ public class EventListener implements IMXEventListener {
     }
 
     @Override
-    public void onEventDecrypted(Event event) {
+    public void onEventSent(Event event, String s) {
 
     }
 
     @Override
-    public void onEventSent(Event event, String s) {
+    public void onEventDecrypted(String s, String s1) {
 
     }
 
@@ -197,7 +198,7 @@ public class EventListener implements IMXEventListener {
     }
 
     @Override
-    public void onAccountDataUpdated() {
+    public void onAccountDataUpdated(AccountDataElement accountDataElement) {
 
     }
 }
