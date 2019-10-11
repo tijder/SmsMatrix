@@ -46,6 +46,7 @@ dependencies {
     implementation(name: 'matrix-sdk', ext: 'aar')
     implementation(name: 'matrix-sdk-core', ext: 'aar')
     implementation(name: 'matrix-sdk-crypto', ext: 'aar')
+    implementation(name: 'olm-sdk', ext: 'aar')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
