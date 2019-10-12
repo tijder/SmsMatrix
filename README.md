@@ -1,3 +1,8 @@
+<a href="https://matrix.to/#/#smsmatrix:matrix.org">
+    <img src="https://img.shields.io/badge/Chat-On%20Matrix-green"
+        alt="Chat on Matrix"/>
+</a>
+
 # SmsMatrix
 A simple SMS (text message) &lt;--> Matrix bridge.
 
