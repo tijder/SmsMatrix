@@ -44,10 +44,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     testImplementation 'junit:junit:4.12'
 
-    implementation(name: 'matrix-sdk', ext: 'aar')
-    implementation(name: 'matrix-sdk-core', ext: 'aar')
-    implementation(name: 'matrix-sdk-crypto', ext: 'aar')
-    implementation(name: 'olm-sdk', ext: 'aar')
+    /************* Matrix SDK management **************/
+    implementation 'com.github.Bubu:matrix-android-sdk:v0.9.30-no-webrtc'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.squareup.retrofit2:retrofit:2.6.0'
