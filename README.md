@@ -15,7 +15,7 @@ As currently there is no end-to-end encryption implemented in this app, for priv
 </a>
 
 # Set up
-- Create a account on a homeserver
+- Create an account on a homeserver
 - Install this app (apk can be found by [releases](https://github.com/tijder/SmsMatrix/releases) or from [f-droid](https://f-droid.org/app/eu.droogers.smsmatrix))
 - Give the app the app permission
 - Type in the needed info in the app
