@@ -9,6 +9,8 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by gerben on 6-10-17.
@@ -16,6 +18,8 @@ import java.util.Map;
 
 public class ReceiverListener extends BroadcastReceiver {
     private static final String TAG = "ReceiverListener";
+    private static final String ACTION_MMS_RECEIVED = "android.provider.Telephony.WAP_PUSH_RECEIVED";
+    private static final String MMS_DATA_TYPE = "application/vnd.wap.mms-message";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -23,6 +27,8 @@ public class ReceiverListener extends BroadcastReceiver {
             handleIncomingSMS(context, intent);
         } else if (intent.getAction().equals("android.intent.action.PHONE_STATE")) {
             handleIncomingCall(context, intent);
+        } else if (intent.getAction().equals(ACTION_MMS_RECEIVED) && intent.getType().equals(MMS_DATA_TYPE)) {
+            handleIncomingMMS(context, intent);
         }
     }
 
@@ -81,4 +87,41 @@ public class ReceiverListener extends BroadcastReceiver {
         }
         Utilities.sendMatrix(context, body, cal_from, Matrix.MESSAGE_TYPE_NOTICE);
     }
+
+    private void handleIncomingMMS(final Context context, Intent intent) {
+        //I don't know how to download MMSC from cell provider. so we will do something with mmssms.sb
+        try {
+            Bundle bundle = intent.getExtras();
+            if (bundle != null) {
+                byte[] buffer = bundle.getByteArray("data");
+                String bufferString = new String(buffer);
+                Log.i(TAG, "bufferString: " + bufferString);
+
+                //Get Phone Number (between + and /TYPE
+                int mmsIndex = bufferString.indexOf("/TYPE");
+                int mmsIndexPlus = bufferString.indexOf("+");
+                String number = bufferString.substring(mmsIndexPlus, mmsIndex);
+                //Got phone number, Remove +1
+                //number = number.replace("+1", "");
+                Log.i(TAG, "Phone Number: " + number);
+
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Log.i(TAG, "Checking if MMS is downloaded.");
+                        // this code will be executed after 15 seconds
+                        Intent intnet = new Intent(context, eu.droogers.smsmatrix.MmsService.class);
+                        intnet.putExtra("onRecieveMms", true);
+                        context.startService(intnet);
+                    }
+                }, 15000);
+
+            }
+
+        } catch (Exception e ) {
+            Log.e(TAG, "received mms failed " + e);
+        }
+
+    }
+
 }
