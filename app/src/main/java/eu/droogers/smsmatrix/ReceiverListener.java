@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
-import android.util.Log;
+
+import androidx.core.content.ContextCompat;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +25,10 @@ public class ReceiverListener extends BroadcastReceiver {
             handleIncomingSMS(context, intent);
         } else if (intent.getAction().equals("android.intent.action.PHONE_STATE")) {
             handleIncomingCall(context, intent);
+        }
+        else if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+            Intent intentServ = new Intent(context, MatrixService.class);
+            ContextCompat.startForegroundService(context, intentServ);
         }
     }
 
