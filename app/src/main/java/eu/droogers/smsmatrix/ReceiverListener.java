@@ -24,6 +24,10 @@ public class ReceiverListener extends BroadcastReceiver {
         } else if (intent.getAction().equals("android.intent.action.PHONE_STATE")) {
             handleIncomingCall(context, intent);
         }
+        else if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+            Intent intentServ = new Intent(context, MatrixService.class);
+            context.startService(intent);
+        }
     }
 
     private void handleIncomingSMS(Context context, Intent intent) {
