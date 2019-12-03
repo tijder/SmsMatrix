@@ -113,7 +113,9 @@ public class MatrixService extends Service {
 
     @Override
     public void onDestroy() {
-        mx.destroy();
+        if (mx != null) {
+            mx.destroy();
+        }
         this.mms.stopMMSMonitoring();
         this.mms = null;
         super.onDestroy();
