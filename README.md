@@ -27,3 +27,7 @@ As currently there is no end-to-end encryption implemented in this app, for priv
 - Press save
 - Now all your text messages will be bridged
 - [optional] Disable battery optimisations for the app. so the app wont be killed by Android.
+
+# Troubleshooting
+
+👉 If using Signal as default SMS app, it would not work, however setting the default android Messages app to default sms app worked (this was tested on Android 6.0)
