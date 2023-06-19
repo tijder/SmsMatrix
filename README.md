@@ -22,7 +22,7 @@ As currently there is no end-to-end encryption implemented in this app, for priv
   - Bot Username: is the username of the just created user
   - Bot Password: is the password of the just created user
   - Homeserver url: is the url of the homeserver where the user is created
-  - Your username: is where you want to forward all yous text message to
+  - Your username: is where you want to forward all your text messages to
   - Devicename: is the devicename wich the api will use
 - Press save
 - Now all your text messages will be bridged
